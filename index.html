@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>A Message For You ❤️</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --accent: #e8b4bc;
+            --glass: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: Montserrat, sans-serif;
+            background: #0b0506;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Added background orbs for extra depth */
+        .bg-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(232, 180, 188, 0.15) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(50px);
+        }
+
+        .card {
+            width: min(520px, 92vw);
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 45px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: "Cormorant Garamond";
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+
+        .sub {
+            opacity: 0.75;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 12px;
+            width: 85%;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-yes {
+            background: var(--accent);
+            color: #333;
+            font-weight: 600;
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .btn-no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .stage {
+            display: none
+        }
+
+        .active {
+            display: block;
+            animation: fade 0.6s ease;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(15px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* modal */
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal-box {
+            background: #1c1416;
+            padding: 30px;
+            border-radius: 18px;
+            border: 1px solid var(--accent);
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        #sig-canvas {
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .receipt {
+            background: white;
+            color: black;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-glow" style="top: -10%; left: -10%;"></div>
+    <div class="bg-glow" style="bottom: -10%; right: -10%;"></div>
+
+    <div id="modal">
+        <div class="modal-box">
+            <p id="modal-text" style="margin-bottom:20px; line-height: 1.5;"></p>
+            <div id="modal-btns"></div>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <div id="stage-0" class="stage active">
+            <h1>Security Clearance</h1>
+            <p class="sub">
+                I need to verify your identity. If you're not the right girl, this is about to get very awkward for both
+                of us.
+                <br><br>
+                <b>Question:</b> Who is the guy that is slightly (very) obsessed with you?
+            </p>
+            <input id="nameInput" placeholder="Enter his name...">
+            <br>
+            <button class="btn-yes" onclick="checkName()">Unlock My Heart</button>
+        </div>
+
+        <div id="stage-1" class="stage">
+            <h1>Okay, you passed.</h1>
+            <p class="sub">
+                I know I said we should wait a little longer before I made this "official," but I've realized that
+                patience is not my strongest suit when it comes to you.
+                <br><br>
+                The truth is, I’m into you way more than I planned. So, let's stop playing around.
+            </p>
+            <button class="btn-yes" onclick="nextStage(2)">Next Step ⮕</button>
+        </div>
+
+        <div id="stage-2" class="stage">
+            <h1>The Big Question</h1>
+            <p class="sub">
+                Every time you smile at me, I'm reminded of why I build things like this.
+                <br><br>
+                <b>Will you be my girlfriend?</b>
+            </p>
+            <p style="opacity:0.6;font-size:0.8rem;margin-bottom:20px">
+                (Warning: The "No" button has a 99% failure rate.)
+            </p>
+            <button class="btn-yes" onclick="yesAnswer()">Yes — Obviously</button>
+            <button class="btn-no" onclick="noAnswer()">No — I like danger</button>
+        </div>
+
+        <div id="stage-3" class="stage">
+            <h1>The Fine Print</h1>
+            <p class="sub">
+                By signing below, you agree to:
+                <br>
+                • Unlimited hugs and loyalty<br>
+                • Putting up with my bad jokes<br>
+                • Letting me care about you every single day
+                <br><br>
+                <i>No refunds. No exchanges.</i>
+            </p>
+            <canvas id="sig-canvas" width="280" height="150"></canvas>
+            <br>
+            <button class="btn-yes" onclick="finish()">Seal The Deal</button>
+        </div>
+
+        <div id="stage-4" class="stage">
+            <h1>I knew it. ❤️</h1>
+            <p class="sub">
+                I knew you had good taste in men when you first smiled at me! 🤣
+                <br><br>
+                You’ve officially made the best decision of your life. I promise to be loyal, to protect your heart, and
+                to learn how to love you better every single day.
+            </p>
+            <p style="font-family:'Cormorant Garamond';font-size:1.6rem;color:#e8b4bc; font-style: italic;">
+                Yours always, Sinclare
+            </p>
+
+            <div class="receipt">
+                --------------------------------<br>
+                RELATIONSHIP RECEIPT<br>
+                --------------------------------<br>
+                Item: (1) Boyfriend [Premium]<br>
+                Name: Sinclare<br><br>
+                Status: Successfully Claimed<br>
+                Owner: You ❤️<br><br>
+                Features:<br>
+                • Unlimited loyalty<br>
+                • Bad joke generator<br>
+                • Lifetime support<br><br>
+                Date: <span id="date"></span><br>
+                --------------------------------<br>
+                Enjoy your new boyfriend.<br>
+                He's quite fond of you.<br>
+                --------------------------------
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("modal")
+        const modalText = document.getElementById("modal-text")
+        const modalBtns = document.getElementById("modal-btns")
+
+        function showMsg(text) {
+            modalText.innerText = text
+            modalBtns.innerHTML = ""
+            let btn = document.createElement("button")
+            btn.innerText = "Okay, fine"
+            btn.className = "btn-yes"
+            btn.onclick = () => modal.style.display = "none"
+            modalBtns.append(btn)
+            modal.style.display = "flex"
+        }
+
+        function checkName() {
+            let v = document.getElementById("nameInput").value.toLowerCase().trim()
+            if (v === "sinclare") {
+                nextStage(1)
+            } else {
+                showMsg("Wrong answer! Are you sure you're the right person? Try again, babe. 😏")
+            }
+        }
+
+        function nextStage(n) {
+            document.querySelectorAll(".stage").forEach(s => s.classList.remove("active"))
+            document.getElementById("stage-" + n).classList.add("active")
+            if (n === 3) initSig()
+        }
+
+        function noAnswer() {
+            showMsg("Error 404: 'No' button is currently out of service. Please try 'Yes' instead. You're my wife now anyway! 😌")
+        }
+
+        function yesAnswer() {
+            showMsg("System Processing...\n\nChecking compatibility...\nAnalyzing smile...\nLoading unlimited affection...\n\nMATCH FOUND! I knew you had good taste in men! 😉❤️")
+            setTimeout(() => {
+                nextStage(3)
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } })
+            }, 2000)
+        }
+
+        function finish() {
+            document.getElementById("date").innerText = new Date().toLocaleDateString()
+            confetti({ particleCount: 300, spread: 100, origin: { y: 0.7 } })
+            nextStage(4)
+        }
+
+        /* signature logic */
+        function initSig() {
+            const canvas = document.getElementById("sig-canvas")
+            const ctx = canvas.getContext("2d")
+            let draw = false
+
+            const getMousePos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX || e.touches[0].clientX) - rect.left,
+                    y: (e.clientY || e.touches[0].clientY) - rect.top
+                };
+            };
+
+            const startDrawing = (e) => {
+                draw = true;
+                const pos = getMousePos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            };
+
+            const moveDrawing = (e) => {
+                if (!draw) return;
+                const pos = getMousePos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = "#e8b4bc";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                e.preventDefault();
+            };
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('mousemove', moveDrawing);
+            canvas.addEventListener('touchmove', moveDrawing);
+            window.addEventListener('mouseup', () => draw = false);
+            window.addEventListener('touchend', () => draw = false);
+        }
+    </script>
+
+</body>
+
+</html>
